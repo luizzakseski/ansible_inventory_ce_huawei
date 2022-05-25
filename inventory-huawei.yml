@@ -1,0 +1,21 @@
+---
+- name: Huawei inventory
+  hosts: huawei
+  connection: network_cli
+  gather_facts: False
+
+  vars:
+    file_path: ./generated_report_huawei.html
+
+  tasks:
+    - name: gathering ce facts
+      community.network.ce_facts:
+        gather_subset: all
+      register: all_facts
+
+    - name: create HTML report
+      template:
+        src: report-huawei.j2
+        dest: "{{ file_path }}"
+      #delegate_to: localhost
+      run_once: true

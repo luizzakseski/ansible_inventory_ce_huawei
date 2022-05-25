@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<table>
+    <thead>
+        <tr>
+            <th>Hostname</th>
+            <th>Mgmt0 IP Address</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+{% for network_switch in groups['huawei'] %}
+        <tr>
+            <td>{{hostvars[network_switch]['ansible_facts']['hostname']}}</td>
+            <td>{{hostvars[network_switch]['ansible_facts']['all_ipv4_addresses']['LoopBack1']}}</td>
+            <td {% if hostvars[network_switch]['ansible_facts']['FAN1'] != "NORMAL" %}style="background:yellow;"{% endif %}>{{hostvars[network_switch]['ansible_facts']['FAN1']}}</td>
+        </tr>
+        <thead>
+        <tr>
+            <th> Port </th>
+            <th> Status </th>
+        </tr>
+        </thead>
+        {% for port in hostvars[network_switch]['ansible_facts']['interfaces'] %}
+        <tr>
+            <td>{{ port }} </td>
+            <td>{{ hostvars[network_switch]['ansible_facts']['interfaces'][port] }}</td>
+        </tr>
+        {% endfor %}
+{% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
