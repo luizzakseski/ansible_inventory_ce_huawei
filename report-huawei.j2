@@ -2,38 +2,153 @@
 <html>
 <head>
   <link rel="stylesheet" href="css/main.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active, .collapsible:hover {
+  background-color: #555;
+}
+
+.content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+
+h1 {
+    color:white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+</style>
 </head>
 <body>
-<table>
+<h1> SWITCHES </h1>
+{% for network_switch in groups['huawei'] %}
+<button type="button" class="collapsible">{{ network_switch }}</button>
+<div class="content">
+<table width='90%'>
     <thead>
         <tr>
-            <th>Hostname</th>
-            <th>Mgmt0 IP Address</th>
+            <th>Interface</th>
+            <th>IP Address</th>
             
         </tr>
     </thead>
     <tbody>
-{% for network_switch in groups['huawei'] %}
+
+        {% for IP in hostvars[network_switch]['ansible_facts']['all_ipv4_addresses'] %}
+        
         <tr>
-            <td>{{hostvars[network_switch]['ansible_facts']['hostname']}}</td>
-            <td>{{hostvars[network_switch]['ansible_facts']['all_ipv4_addresses']['LoopBack1']}}</td>
-            <td {% if hostvars[network_switch]['ansible_facts']['FAN1'] != "NORMAL" %}style="background:yellow;"{% endif %}>{{hostvars[network_switch]['ansible_facts']['FAN1']}}</td>
+            <td>{{ IP }}</td>
+            <td>{{ hostvars[network_switch]['ansible_facts']['all_ipv4_addresses'][IP] }}</td>
         </tr>
+        {% endfor %}
+   </tbody>
+</table>
+<button type="button" class="collapsible">FAN e POWER</button>
+<div class="content">
+    <table>        
         <thead>
         <tr>
-            <th> Port </th>
+            <th> ITEM </th>
             <th> Status </th>
         </tr>
         </thead>
+        <tbody>
+        <tr>
+            <td> FAN1 </td>
+            <td {% if hostvars[network_switch]['ansible_facts']['FAN1'] != "Normal" %}style="background:yellow;"{% endif %}>{{hostvars[network_switch]['ansible_facts']['FAN1']}}</td>   
+        </tr>
+        <tr> 
+            <td> FAN2 </td>
+            <td {% if hostvars[network_switch]['ansible_facts']['FAN2'] != "Normal" %}style="background:yellow;"{% endif %}>{{hostvars[network_switch]['ansible_facts']['FAN2']}}</td>
+        </tr>
+        <tr> 
+            <td> FAN3 </td>
+            <td {% if hostvars[network_switch]['ansible_facts']['FAN3'] != "Normal" %}style="background:yellow;"{% endif %}>{{hostvars[network_switch]['ansible_facts']['FAN3']}}</td>
+        </tr>
+        <tr> 
+            <td> PWR1 </td>
+            <td {% if hostvars[network_switch]['ansible_facts']['PWR1'] != "Normal" %}style="background:yellow;"{% endif %}>{{hostvars[network_switch]['ansible_facts']['PWR1']}}</td>
+        </tr>
+        <tr> 
+            <td> PWR2 </td>
+            <td {% if hostvars[network_switch]['ansible_facts']['PWR2'] != "Normal" %}style="background:yellow;"{% endif %}>{{hostvars[network_switch]['ansible_facts']['PWR2']}}</td>
+        </tr>
+        </tbody>
+</table>
+</div>
+<button type="button" class="collapsible">INTERFACES</button>
+<div class="content">
+    <table> 
+        <thead>
+            <tr>
+                <th> Port </th>
+                <th> Status </th>
+            </tr>
+        </thead>
+        <tbody>    
         {% for port in hostvars[network_switch]['ansible_facts']['interfaces'] %}
         <tr>
             <td>{{ port }} </td>
-            <td>{{ hostvars[network_switch]['ansible_facts']['interfaces'][port] }}</td>
+            <td {% if hostvars[network_switch]['ansible_facts']['interfaces'][port] == "up" %}style="background:lightgreen;"{% endif %}>{{hostvars[network_switch]['ansible_facts']['interfaces'][port] }}</td>
         </tr>
         {% endfor %}
+        </tbody>
+    </table>
+</div>
+<button type="button" class="collapsible">RUNNING CONFIG</button>
+<div class="content">
+    <table> 
+        <thead>
+            <tr>
+                <th> Running Config </th>
+                
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{% for line in hostvars[network_switch]['ansible_facts']['config'] %}
+                {{ line }}<br/>
+                {% endfor %}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<br><br>
+</div>
 {% endfor %}
-    </tbody>
-</table>
+
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
+
 
 </body>
 </html>
